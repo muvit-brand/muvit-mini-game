@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Поймай футболку — мини‑игра</title>
+  <style>
+    body { background:#0f1222; color:white; font-family:system-ui; text-align:center; margin:0; }
+    canvas { background:#111; display:block; margin:20px auto; border-radius:12px; }
+    button { background:#6df0c2; border:none; padding:10px 20px; border-radius:10px; font-weight:bold; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <h1>Поймай футболку 👕</h1>
+  <canvas id="game" width="400" height="600"></canvas>
+  <p><button onclick="start()">Играть</button></p>
+  <script>
+    const c=document.getElementById('game'),x=c.getContext('2d');
+    let tees=[],score=0,playing=false;
+    function spawn(){tees.push({x:Math.random()*360+20,y:-20,v:2+Math.random()*3});}
+    function draw(){
+      x.fillStyle='#111';x.fillRect(0,0,400,600);
+      for(let t of tees){t.y+=t.v;x.fillStyle='#6df0c2';x.fillRect(t.x-15,t.y-15,30,30);x.fillStyle='#000';x.fillText('👕',t.x-9,t.y+9);}
+      x.fillStyle='#fff';x.fillText('Счёт: '+score,10,20);
+      tees=tees.filter(t=>t.y<620);
+      if(Math.random()<0.02)spawn();
+      requestAnimationFrame(draw);
+    }
+    c.onclick=e=>{
+      if(!playing)return;
+      const r=c.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;
+      for(let t of tees){if(Math.abs(px-t.x)<20&&Math.abs(py-t.y)<20){tees.splice(tees.indexOf(t),1);score++;break;}}
+    };
+    function start(){score=0;tees=[];playing=true;draw();}
+  </script>
+</body>
+</html>
