@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#d1dce7" />
+  <title>Поймай футболку — MUVIT</title>
+  <style>
+    :root{ --bg1:#d1dce7; --bg2:#e6edf3; --text:#44606e; --btn:#e3801e; --muted:#6e8a97; --panel:#ffffff; --border:#c7d3de; }
+    @font-face{ font-family:'MUVITBrand'; src:url('./assets/centurygothic_bold.ttf') format('truetype'); font-weight:700; font-style:normal; font-display:swap; }
+    html{ -webkit-text-size-adjust:100%; }
+    *,*::before,*::after{ box-sizing:border-box; }
+    [hidden]{ display:none !important; }
+    html,body{height:100%;margin:0}
+    body{ background: radial-gradient(1200px 700px at 70% -10%, var(--bg2) 0%, var(--bg1) 55%); color:var(--text); font-family:'MUVITBrand', system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial; display:grid; place-items:center; }
+    img{max-width:100%; height:auto; display:block;}
+    .wrap{width:min(760px,100%);padding:16px}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:0 10px 40px rgba(50,70,90,.15); margin:8px auto;}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px; padding:12px 14px;border-bottom:1px solid var(--border); flex-wrap:wrap;}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0;}
+    .brand img{height:36px;flex:0 0 auto;animation:float 3s ease-in-out infinite;}
+    @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-4px)}100%{transform:translateY(0)}}
+    h1{margin:0; font-size:clamp(18px, 4.6vw, 22px); line-height:1.2; white-space:normal; word-break:break-word;}
+    h1 small{display:block;color:var(--muted); font-size:clamp(11px,3.2vw,12px)}
+    .btn, .shop a{background:var(--btn);color:#fff;text-decoration:none;border:none;border-radius:12px;padding:12px 16px;cursor:pointer;font-weight:700;display:inline-block; box-shadow:0 6px 20px rgba(227,128,30,.25);}
+    .btn.pulse{ animation:pulse 1.6s ease-in-out infinite; }
+    .btn.ghost{background:#fff;color:var(--text);border:1px solid var(--border);box-shadow:none}
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+    .game{position:relative;}
+    canvas{width:100%;height:auto;display:block;background:linear-gradient(180deg,#edf3f7,#e4eef5);}
+    .hud{position:absolute;left:12px;top:10px;right:12px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
+    .pill{background:#f5f9fc;border:1px solid var(--border);border-radius:999px;padding:6px 10px;font-size:13px;color:var(--text);box-shadow:0 6px 16px rgba(0,0,0,.05)}
+    .overlay{position:absolute;inset:0;display:grid;place-items:center;background:rgba(209,220,231,.6);backdrop-filter:blur(4px);}
+    .screen{width:min(560px,92%);background:#fff;border:1px solid var(--border);border-radius:18px;padding:24px;text-align:center;box-shadow:0 12px 36px rgba(50,70,90,.18);position:relative; overflow:hidden;}
+    .title{font-size:clamp(22px,6vw,30px);margin:0 0 10px}
+    .subtitle{margin:0 0 16px;color:var(--muted)}
+    .badge{position:absolute; top:10px; right:-14px; background:#19c37d; color:#fff; padding:6px 16px; transform:rotate(12deg); border-radius:10px; font-size:13px; display:none; box-shadow:0 8px 20px rgba(25,195,125,.35);}
+    .start-bg{position:absolute;inset:0;pointer-events:none;opacity:.35; filter:blur(2px);}
+    .start-bg img{position:absolute; width:72px; transform:rotate(-10deg); opacity:.8; animation:float 4s ease-in-out infinite;}
+    footer{padding:12px 14px;text-align:center;border-top:1px solid var(--border);color:var(--muted);font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="brand">
+          <img src="assets/logo.png?v=2" alt="MUVIT" />
+          <div>
+            <h1>Поймай футболку <small>MUVIT — мини‑игра</small></h1>
+          </div>
+        </div>
+        <div class="shop">
+          <a class="btn" href="https://clck.ru/3PW6wp" target="_blank" rel="noopener">🛍 Смотреть на WB</a>
+        </div>
+      </header>
+
+      <div class="game">
+        <canvas id="game" width="640" height="960" aria-label="Игровое поле"></canvas>
+
+        <div class="hud">
+          <div class="pill">Счёт: <b id="score">0</b></div>
+          <div class="pill">Жизни: <b id="lives">3</b></div>
+          <div class="pill">Рекорд: <b id="best">0</b></div>
+        </div>
+
+        <div class="overlay" id="startScreen">
+          <div class="screen">
+            <div class="start-bg">
+              <img src="assets/tee1.png" style="left:16px; top:16px">
+              <img src="assets/tee2.png" style="right:20px; top:40px; transform:rotate(12deg)">
+              <img src="assets/tee3.png" style="left:36px; bottom:16px; transform:rotate(-6deg)">
+            </div>
+            <p><img src="assets/logo.png?v=2" alt="MUVIT" style="height:52px; animation:float 3s ease-in-out infinite;"></p>
+            <p class="title">Поймай футболку</p>
+            <p class="subtitle">Играй и найди свой стиль</p>
+            <p><button class="btn pulse" id="startBtn">🕹 Играть</button></p>
+          </div>
+        </div>
+
+        <div class="overlay" id="gameOver" hidden>
+          <div class="screen">
+            <span class="badge" id="newRecordBadge">Новый рекорд!</span>
+            <p class="title">Игра окончена</p>
+            <p class="subtitle">Счёт: <b id="finalScore">0</b> · Рекорд: <b id="finalBest">0</b></p>
+            <p class="subtitle"><a class="btn" href="https://clck.ru/3PW6wp" target="_blank" rel="noopener">🛍 Смотреть на WB</a></p>
+            <p style="display:flex; gap:8px; justify-content:center;">
+              <button class="btn" id="shareBtn">Поделиться</button>
+              <button class="btn ghost" id="againBtn">Ещё раз</button>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <footer>© MUVIT — играй и найди свой стиль</footer>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const teesSrc = ['assets/tee1.png','assets/tee2.png','assets/tee3.png','assets/tee4.png','assets/tee5.png','assets/tee6.png','assets/tee7.png','assets/tee8.png'];
+
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  const W = 640, H = 960;
+  canvas.width = W * DPR; canvas.height = H * DPR; canvas.style.width = '100%'; canvas.style.height = 'auto';
+  ctx.scale(DPR, DPR);
+
+  const scoreEl = document.getElementById('score');
+  const livesEl = document.getElementById('lives');
+  const bestEl = document.getElementById('best');
+  const startScreen = document.getElementById('startScreen');
+  const gameOver = document.getElementById('gameOver');
+  const startBtn = document.getElementById('startBtn');
+  const againBtn = document.getElementById('againBtn');
+  const shareBtn = document.getElementById('shareBtn');
+  const finalScore = document.getElementById('finalScore');
+  const finalBest = document.getElementById('finalBest');
+  const newRecordBadge = document.getElementById('newRecordBadge');
+
+  // initial visibility
+  startScreen.hidden = false; gameOver.hidden = true;
+
+  const images = teesSrc.map(src => { const i=new Image(); i.src=src; return i; });
+  function rand(a,b){ return a + Math.random()*(b-a); }
+  const tees=[], effects=[];
+  let running=false, score=0, lives=3, best=+localStorage.getItem('muvit_best')||0;
+  bestEl.textContent=best;
+  let t=0, last=0, lastSpawn=0, speed=170;
+  let isNewRecord=false;
+
+  function spawn(){
+    const size = rand(72, 120);
+    const x = rand(size*0.5, (W - size*0.5));
+    const y = -size;
+    const vy = rand(speed*0.8, speed*1.25);
+    const img = images[Math.floor(Math.random()*images.length)];
+    const rot = rand(-0.18,0.18), spin = rand(-0.5,0.5);
+    tees.push({x,y,vy,size,img,rot,spin});
+  }
+  function drawBG(){
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#edf3f7'); g.addColorStop(1,'#e4eef5');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  }
+  function draw(){
+    drawBG();
+    for(const te of tees){
+      ctx.save(); ctx.translate(te.x,te.y); ctx.rotate(te.rot);
+      const w=te.size, h=te.size*(te.img.naturalHeight? te.img.naturalHeight/te.img.naturalWidth : 1.1);
+      ctx.drawImage(te.img, -w/2,-h/2,w,h); ctx.restore();
+    }
+    for(const e of effects){
+      ctx.globalAlpha=e.a; ctx.fillStyle=e.c; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1;
+    }
+  }
+  function update(dt){
+    t+=dt; speed+=dt*2;
+    if(t-lastSpawn > Math.max(0.2,0.9-t*0.02)){ spawn(); lastSpawn=t; }
+    for(let i=tees.length-1;i>=0;i--){
+      const te=tees[i];
+      te.y+=te.vy*dt; te.rot+=te.spin*dt;
+      if(te.y - te.size/2 > H){ tees.splice(i,1); miss(); }
+    }
+    for(let i=effects.length-1;i>=0;i--){
+      const e=effects[i]; e.r+=60*dt; e.a-=1.2*dt; if(e.a<=0) effects.splice(i,1);
+    }
+  }
+  function loop(ts){
+    if(!running){ last=ts; return; }
+    const dt=Math.min(0.033,(ts-last)/1000); last=ts;
+    update(dt); draw(); requestAnimationFrame(loop);
+  }
+  function start(){
+    score=0; lives=3; t=0; lastSpawn=0; speed=170; tees.length=0; effects.length=0; isNewRecord=false;
+    scoreEl.textContent=score; livesEl.textContent=lives;
+    startScreen.hidden=true; gameOver.hidden=true; running=true;
+    requestAnimationFrame(ts=>{ last=ts; loop(ts); });
+  }
+  function end(){
+    running=false;
+    if(score>best){ best=score; isNewRecord=true; localStorage.setItem('muvit_best',best); }
+    finalScore.textContent=score; finalBest.textContent=best; bestEl.textContent=best;
+    newRecordBadge.style.display = isNewRecord ? 'inline-block' : 'none';
+    gameOver.hidden=false;
+  }
+  function miss(){ lives--; livesEl.textContent=lives; if(lives<=0) end(); }
+  function getPos(e){ const r=canvas.getBoundingClientRect(); const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left; const y=(e.touches?e.touches[0].clientY:e.clientY)-r.top; return {x,y}; }
+  function hit(x,y){
+    for(let i=tees.length-1;i>=0;i--){
+      const te=tees[i]; const r=te.size*0.6; const dx=x-te.x; const dy=y-te.y;
+      if(dx*dx+dy*dy<r*r){ tees.splice(i,1); score++; scoreEl.textContent=score; effects.push({x,y,r:6,a:.7,c:'rgba(227,128,30,.35)'}); return true; }
+    } effects.push({x,y,r:4,a:.5,c:'rgba(0,0,0,.15)'}); return false;
+  }
+  async function share(){
+    const url=location.href; const text=`Мой счёт: ${score}. Поймай футболку от MUVIT!`;
+    try{ if(navigator.share) await navigator.share({title:'Поймай футболку — MUVIT', text, url});
+         else if(navigator.clipboard){ await navigator.clipboard.writeText(url); alert('Ссылка скопирована!'); }
+         else{ prompt('Скопируй ссылку:', url); } }catch(e){ console.log(e); }
+  }
+  canvas.addEventListener('click', e=>{ if(running){ const p=getPos(e); hit(p.x,p.y); } });
+  canvas.addEventListener('touchstart', e=>{ if(running){ const p=getPos(e); hit(p.x,p.y); } }, {passive:true});
+  if(startBtn) startBtn.onclick = () => start();
+  if(againBtn) againBtn.onclick = () => start();
+  if(shareBtn) shareBtn.onclick = () => share();
+  window.muvStart = start;
+  draw();
+})();
+</script>
+</body>
+</html>
